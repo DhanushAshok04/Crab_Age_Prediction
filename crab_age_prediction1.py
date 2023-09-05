@@ -8,125 +8,17 @@ Original file is located at
 """
 
 
-
-# import streamlit as st
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from sklearn.preprocessing import LabelEncoder, StandardScaler
-# from sklearn.model_selection import train_test_split
-# from sklearn.metrics import mean_absolute_error
-# import tensorflow as tf
-# from tensorflow import keras
-# from tensorflow.keras import layers
-# import urllib
-
-# # Define dataset URLs
-# train_csv_url = "https://raw.githubusercontent.com/DhanushAshok04/Crab_Age_Prediction/main/Datasets/train.csv"
-# test_csv_url = "https://raw.githubusercontent.com/DhanushAshok04/Crab_Age_Prediction/main/Datasets/test.csv"
-# gender_submission_csv_url = "https://raw.githubusercontent.com/DhanushAshok04/Crab_Age_Prediction/main/Datasets/sample_submission.csv"
-
-# # Load data
-# train_df = pd.read_csv(train_csv_url)
-# test_df = pd.read_csv(test_csv_url)
-# gender_submission = pd.read_csv(gender_submission_csv_url)
-
-# # Step 1: Preprocess the data
-# label_encoder = LabelEncoder()
-# train_df['Sex'] = label_encoder.fit_transform(train_df['Sex'])
-# test_df['Sex'] = label_encoder.transform(test_df['Sex'])
-
-# X = train_df[['Sex', 'Length', 'Diameter', 'Height', 'Weight', 'Shucked Weight', 'Viscera Weight', 'Shell Weight']]
-# y = train_df['Age']
-
-# scaler = StandardScaler()
-# X = scaler.fit_transform(X)
-
-# # Split the data into training and validation sets
-# X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# # Step 2: Build and train the model
-# model = keras.Sequential([
-#     layers.Dense(64, activation='relu', input_dim=X.shape[1]),
-#     layers.Dense(32, activation='relu'),
-#     layers.Dense(1, activation='linear')
-# ])
-
-# model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])  # Add accuracy metric
-
-# # Train the model
-# history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, batch_size=32, verbose=1)  # Change verbose to 1
-
-# # Calculate and display the model's accuracy
-# val_loss = history.history['val_loss'][-1]
-# mae = mean_absolute_error(y_val, model.predict(X_val))
-# accuracy = 1.0 - mae  # Calculate accuracy as 1 - MAE
-
-# # Create a Streamlit app with custom theme
-# st.set_page_config(
-#     page_title="Crab Age Predictor",
-#     page_icon="🦀",
-#     layout="wide",
-# )
-
-# st.title("Crab Age Predictor")
-# st.write("Predict the age of a crab based on its attributes.")
-
-# # Create input fields for user input
-# st.write("Enter crab details:")
-# sex = st.text_input("Sex (M/F/I)")
-# length = st.number_input("Length")
-# diameter = st.number_input("Diameter")
-# height = st.number_input("Height")
-# weight = st.number_input("Weight")
-# shucked_weight = st.number_input("Shucked Weight")
-# viscera_weight = st.number_input("Viscera Weight")
-# shell_weight = st.number_input("Shell Weight")
-
-# # Predict the age when the user clicks the button
-# if st.button("Predict Age"):
-#     input_data = [[label_encoder.transform([sex])[0], length, diameter, height, weight, shucked_weight, viscera_weight, shell_weight]]
-#     input_data = scaler.transform(input_data)
-#     predicted_age = model.predict(input_data)[0][0]
-#     st.write(f"Predicted Age: {round(predicted_age, 2)}")
-
-# # Display the final validation accuracy
-# st.write(f"Final Validation Accuracy: {accuracy:.4f}")
-
-# # Display dataset
-# st.subheader("Train Dataset:")
-# st.dataframe(train_df)
-
-# # Visualizations
-# st.subheader("Visualizations")
-# st.pyplot(plt)
-
-# # Theme customization
-# st.markdown(
-#     """
-#     <style>
-#     .reportview-container {
-#         background: #0C356A;
-#         color: white;
-#     }
-#     .sidebar .sidebar-content {
-#         background: #0C356A;
-#     }
-#     </style>
-#     """,
-#     unsafe_allow_html=True
-# )
-
 import streamlit as st
 import pandas as pd
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import urllib
 
 # Define dataset URLs
 train_csv_url = "https://raw.githubusercontent.com/DhanushAshok04/Crab_Age_Prediction/main/Datasets/train.csv"
@@ -159,10 +51,15 @@ model = keras.Sequential([
     layers.Dense(1, activation='linear')
 ])
 
-model.compile(optimizer='adam', loss='mean_squared_error')
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])  # Add accuracy metric
 
 # Train the model
-model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, batch_size=32, verbose=0)  # Set verbose to 0
+history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=10, batch_size=32, verbose=1)  # Change verbose to 1
+
+# Calculate and display the model's accuracy
+val_loss = history.history['val_loss'][-1]
+mae = mean_absolute_error(y_val, model.predict(X_val))
+accuracy = 1.0 - mae  # Calculate accuracy as 1 - MAE
 
 # Create a Streamlit app with custom theme
 st.set_page_config(
@@ -192,38 +89,27 @@ if st.button("Predict Age"):
     predicted_age = model.predict(input_data)[0][0]
     st.write(f"Predicted Age: {round(predicted_age, 2)}")
 
+# Display the final validation accuracy
+st.write(f"Final Validation Accuracy: {accuracy:.4f}")
+
 # Display dataset
 st.subheader("Train Dataset:")
 st.dataframe(train_df)
 
 # Visualizations
 st.subheader("Visualizations")
-
-# Age Distribution
-plt.figure(figsize=(10, 6))
-plt.hist(train_df['Age'], bins=20, color='#5C8374')
-plt.xlabel('Age (years)')
-plt.ylabel('Count')
-st.pyplot()
-
-# Pairplot
-sns.set(style="whitegrid")
-pairplot = sns.pairplot(train_df, diag_kind="kde", plot_kws={'alpha': 0.6}, palette='#5C8374')
-st.pyplot(pairplot)
+st.pyplot(plt)
 
 # Theme customization
 st.markdown(
     """
     <style>
     .reportview-container {
-        background: #5C8374;
+        background: #0C356A;
         color: white;
     }
     .sidebar .sidebar-content {
-        background: #5C8374;
-    }
-    .stButton > button {
-        background-color: #5C8374;
+        background: #0C356A;
     }
     </style>
     """,
